@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        #map { height: 500px; width: 100%; }
+        .container { max-width: 800px; margin: auto; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Online Users Map</h2>
+        <div id="map"></div>
+    </div>
+
+    <script>
+        let map = L.map('map').setView([9.082, 8.6753], 6); // Nigeria center
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        function fetchUsers() {
+            fetch("/get_online_users/")
+            .then(response => response.json())
+            .then(data => {
+                map.eachLayer(layer => { 
+                    if (layer instanceof L.Marker) map.removeLayer(layer); 
+                });
+
+                data.users.forEach(user => {
+                    if (user.latitude && user.longitude) {
+                        L.marker([user.latitude, user.longitude])
+                        .addTo(map)
+                        .bindPopup(`<b>${user.username}</b><br>IP: ${user.ip}<br>Last Seen: ${user.last_updated}`);
+                    }
+                });
+            })
+            .catch(error => console.error("Error fetching users:", error));
+        }
+
+        // Refresh online users every 10 seconds
+        setInterval(fetchUsers, 10000);
+        fetchUsers();
+    </script>
+</body>
+</html>
