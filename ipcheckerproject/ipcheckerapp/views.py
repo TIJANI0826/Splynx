@@ -35,30 +35,32 @@ def dashboard(request):
 
 @csrf_exempt
 def update_ip(request):
-    """Update the user's IP address, latitude, and longitude if logged in."""
     if request.method == "POST":
         try:
             data = json.loads(request.body)
+            username = data.get("username")
+            user_id = data.get("user_id")
             ip_address = data.get("ip_address")
             latitude = data.get("latitude")
             longitude = data.get("longitude")
 
-            # Find user and update their IP and location
-            user = UserIP.objects.get(username=data.get("username"))
-            user.ip_address = ip_address
-            user.latitude = latitude
-            user.longitude = longitude
-            print(user.latitude)
-            print(user.longitude)
-            print(user.ip_address)
-            print(user.username)
-            user.save()
+            user, created = UserIP.objects.update_or_create(
+                user_id=user_id,
+                defaults={
+                    "username": username,
+                    "ip_address": ip_address,
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "is_online": True,
+                    "last_updated": now(),
+                }
+            )
 
-            return JsonResponse({"message": "IP and location updated successfully"}, status=200)
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=400)
+            return JsonResponse({"message": "IP and session updated", "status": "success"})
+        except:
+            return JsonResponse({"message": "Invalid data", "status": "error"}, status=400)
 
-    return JsonResponse({"error": "Unauthorized"}, status=403)
+    return JsonResponse({"message": "Invalid request"}, status=400)
 
 def logout_user(request):
     """Logout the user."""

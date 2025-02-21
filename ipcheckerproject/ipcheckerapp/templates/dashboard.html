@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+
+   
     <script>
         function updateIP() {
             fetch("https://api64.ipify.org?format=json")
@@ -27,7 +29,7 @@
                                 "Content-Type": "application/json",
                                 "X-CSRFToken": getCookie("csrftoken"),
                             },
-                            body: JSON.stringify({ "ip_address": ip, "latitude": latitude, "longitude": longitude })
+                            body: JSON.stringify({"username": '{{ username|escapejs }}',"user_id": '{{ user_id|escapejs }}' ,"ip_address": ip, "latitude": latitude, "longitude": longitude })
                         })
                         .then(response => response.json())
                         .then(data => {
